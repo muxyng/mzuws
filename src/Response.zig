@@ -122,7 +122,12 @@ pub fn writeStatus(self: *const Response, status: []const u8) void {
     c.uws_res_write_status(self.ptr, status.ptr, status.len);
 }
 
-pub fn writeStatusCode(self: *const Response, comptime status: StatusCode) void {
+pub fn writeStatusCode(self: *const Response, status: StatusCode) void {
+    var buf: [8]u8 = undefined;
+    self.writeStatus(std.fmt.bufPrint(&buf, "{d}", .{status}) catch unreachable);
+}
+
+pub fn writeStatusCodeWithText(self: *const Response, comptime status: StatusCode) void {
     const status_text = comptime status.toString();
     self.writeStatus(status_text);
 }
