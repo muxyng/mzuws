@@ -139,16 +139,4 @@ _ = v2.merge(v1);
 app.comptimeGroup(v2);
 ```
 
-# Running the Examples
-
-To run the provided examples in `zuws`, clone the repository and run the following command:
-
-```zsh
-zig build example -- <example-name>
-```
-
-You can also generate the assembly of a specific example using the following:
-
-```zsh
-zig build example-asm -- <example-name>
-```
+This fork intentionally omits bundled examples and non-essential tooling files.

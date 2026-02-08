@@ -79,9 +79,6 @@ pub fn build(b: *std.Build) !void {
     });
     b.installArtifact(libzuws);
 
-    const example_step = b.step("example", "Build and run an example.");
-    const example_assembly_step = b.step("example-asm", "Build and emit an example's assembly.");
-
     const export_test = b.addTest(.{
         .root_module = zuws,
     });
@@ -89,41 +86,4 @@ pub fn build(b: *std.Build) !void {
 
     const test_step = b.step("test", "Run unit tests on the exports");
     test_step.dependOn(&run_export_test.step);
-
-    if (b.args) |args| {
-        const example_name = args[0];
-        const path = try std.fmt.allocPrint(b.allocator, "examples/{s}/main.zig", .{example_name});
-
-        const io = std.Options.debug_io;
-        try std.Io.Dir.cwd().access(io, path, .{});
-
-        const exe = b.addExecutable(.{
-            .name = example_name,
-            .root_module = b.createModule(.{
-                .root_source_file = b.path(path),
-                .target = target,
-                .optimize = optimize,
-            }),
-        });
-
-        exe.root_module.addImport("uws", uWebSockets);
-        exe.root_module.addImport("zuws", zuws);
-        b.installArtifact(exe);
-
-        const run_cmd = b.addRunArtifact(exe);
-        run_cmd.step.dependOn(b.getInstallStep());
-
-        example_step.dependOn(&run_cmd.step);
-
-        const asm_description = try std.fmt.allocPrint(b.allocator, "Emit the {s} example ASM file", .{example_name});
-        const asm_step_name = try std.fmt.allocPrint(b.allocator, "{s}-asm", .{example_name});
-        const asm_step = b.step(asm_step_name, asm_description);
-
-        const awf = b.addUpdateSourceFiles();
-        awf.step.dependOn(b.getInstallStep());
-        awf.addCopyFileToSource(exe.getEmittedAsm(), "main.asm");
-
-        asm_step.dependOn(&awf.step);
-        example_assembly_step.dependOn(asm_step);
-    }
 }
